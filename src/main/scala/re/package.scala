@@ -31,5 +31,10 @@ package object re {
 		}
 	}
 
+	def checkEquality[S, T, U](da1: DeterministicAutomaton[S, T], da2: DeterministicAutomaton[U, T]): Option[List[T]] =
+		da1.combine(da2, DeterministicAutomaton.EqualCheck).nonEmpty
+	
+	def checkEquality(s1: String, s2: String): Option[List[Char]] = checkEquality(Parser.parseToDFA(s1), Parser.parseToDFA(s2))
+
 }
 

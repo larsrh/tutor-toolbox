@@ -102,11 +102,6 @@ object DeterministicAutomaton {
 	case object Union extends CombineMode
 	case object EqualCheck extends CombineMode // yields an automaton which has a non-empty language iff the original automata are not equivalent
 
-	def checkEquality[S, T, U](da1: DeterministicAutomaton[S, T], da2: DeterministicAutomaton[U, T]): Option[List[T]] =
-		da1.combine(da2, EqualCheck).nonEmpty
-	
-	def checkEquality(s1: String, s2: String): Option[List[Char]] = checkEquality(Parser.parseToDFA(s1), Parser.parseToDFA(s2))
-
 }
 
 class DeterministicAutomaton[S, T] private(override val start: Option[S], override val transition: Map[(S, T), Option[S]], override val end: Set[S]) extends AutomatonLike[S, T, Option] {
