@@ -9,4 +9,4 @@ libraryDependencies +=
 
 seq(ProguardPlugin.proguardSettings :_*)
 
-proguardOptions += keepMain("theo.Main")
+proguardOptions += keepMain("theo.re.Main")

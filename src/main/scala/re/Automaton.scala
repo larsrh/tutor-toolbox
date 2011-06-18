@@ -1,5 +1,5 @@
 
-package theo
+package theo.re
 
 import scala.collection._
 

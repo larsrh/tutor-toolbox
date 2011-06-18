@@ -1,8 +1,10 @@
 
+package theo
+
 import scalaz._
 import Scalaz._
 
-package object theo {
+package object re {
 
 	implicit def EmptyPlusMonoid[EP[_], T](implicit e: Empty[EP], p: Plus[EP]) = new Monoid[EP[T]] {
 		val zero = e.empty[T]
