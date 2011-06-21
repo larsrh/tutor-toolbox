@@ -17,7 +17,8 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 	lazy val syms = transition.keySet.map(_._2)
 
 	protected[this] def withParams[U, V](newStart: M[U], newTransition: Map[(U, V), M[U]], newEnd: Set[U]): Mapped[U, V]
-	protected[this] def isAccepting(metaState: M[S]): Boolean
+	
+	def isAccepting(metaState: M[S]): Boolean
 
 	final def step(metaState: M[S], sym: T): M[S] =	// w00t scalaz
 		metaState flatMap { s => 
@@ -38,7 +39,7 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 
 	final def renumberStates: Mapped[Int, T] = mapStates(renumberer)
 
-	final def nonEmpty: Option[List[T]] = {
+	final def nonEmpty: Option[(List[T], M[S])] = {
 		var queue = mutable.Queue((start, List.empty[T]))
 		var done = Set[M[S]]()
 
@@ -47,7 +48,7 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 
 			if (!(done contains metaState)) {
 				if (isAccepting(metaState))
-					return Some(proof.reverse)
+					return Some((proof.reverse), metaState)
 
 				for (sym <- syms) {
 					val stepped = step(metaState, sym)
@@ -67,9 +68,9 @@ class Automaton[S, T](override val start: Set[S], override val transition: Map[(
 
 	override type Mapped[U, V] = Automaton[U, V]
 
-	override protected[this] def isAccepting(states: Set[S]) = !(states intersect end).isEmpty
-
 	override protected[this] def withParams[U, V](newStart: Set[U], newTransition: Map[(U, V), Set[U]], newEnd: Set[U]) = new Automaton(newStart, newTransition, newEnd)
+
+	override def isAccepting(states: Set[S]) = !(states intersect end).isEmpty
 
 	def deterministic: DeterministicAutomaton[Set[S], T] = {
 		var queue = mutable.Queue(start)
@@ -112,13 +113,13 @@ class DeterministicAutomaton[S, T] private(override val start: Option[S], overri
 
 	override type Mapped[U, V] = DeterministicAutomaton[U, V]
 
-	override protected[this] def isAccepting(state: Option[S]) = state exists { s => end contains s }
-
 	override protected[this] def withParams[U, V](newStart: Option[U], newTransition: Map[(U, V), Option[U]], newEnd: Set[U]) = newStart map { s =>
 		new DeterministicAutomaton(s, newTransition, newEnd)
 	} getOrElse
 		empty[U, V]
 	
+	override def isAccepting(state: Option[S]) = state exists { s => end contains s }
+
 	def states: Set[S] = transition.keySet.map(_._1) ++ transition.values.flatten ++ end ++ start
 
 	def combine[U](other: DeterministicAutomaton[U, T], mode: CombineMode): Mapped[(Option[S], Option[U]), T] = {

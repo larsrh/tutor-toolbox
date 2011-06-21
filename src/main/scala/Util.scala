@@ -39,34 +39,23 @@ object Util {
 		}
 	}
 
-/*
-	def compare(strs: String*): Boolean = {
-		require(strs.size >= 2)
+	def compare[T, U](examples: Iterable[U])(f: (U, T) => Boolean)(args: T*): Option[(U, Seq[Boolean])] = {
+		require(args.size >= 2)
 
-		val parsed = strs map Parser.parse
-		val syms: Set[Char] = parsed.flatMap((r: RegEx[Char]) => r.symbols)(breakOut)
-		val testSeqs = sequenceIter(syms, 15)
+		val pargs = args.par
+		examples.view flatMap { u =>
+			val results = pargs map { t => f(u, t) } seq;
+			if (results.toSet.size > 1)
+				Some((u, results))
+			else
+				None
+		} headOption 
+	}
 
-		val automata = parsed map (_.toAutomaton.mapSyms(_.get).renumberStates)
-
-		val failed = (testSeqs.toSeq.par) exists { seq =>
-			val results = automata map (_.eval(seq: _*))
-			val same = results.toSet.size == 1
-			if (!same) {
-				Main.synchronized {
-					println("Comparision failed for " + seq.mkString)
-					println("Results per regular expression: ")
-					for ((k, v) <- strs zip results)
-						println("  " + k + ": " + v)
-					Console.flush()
-				}
-			}
-			!same
-		}
-
-		!failed
-	}*/
-
+	implicit def enrichBoolean(b: Boolean) = new {
+		def choose[T](ifTrue: => T, ifFalse: => T) =
+			if (b) ifTrue else ifFalse
+	}
 
 }
 
