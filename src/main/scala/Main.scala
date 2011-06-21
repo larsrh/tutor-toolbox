@@ -4,7 +4,8 @@ package theo
 object Main {
 
 	val modules = List(
-		re.Main
+		re.Main,
+		cfg.Main
 	)
 
 	def main(args: Array[String]) = {

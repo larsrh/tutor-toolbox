@@ -221,6 +221,10 @@ case class ChomskyNF[NT, T](
 		}
 	}
 
+	def terminals: Set[T] = productions map { _._2 } collect {
+		case Left(t) => t
+	}
+
 	override def toString = {
 		def ntToString(nt: NT) = nt match {
 			case sym: Symbol => "<" + sym.name + ">"
