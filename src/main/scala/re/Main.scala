@@ -1,11 +1,9 @@
+package edu.tum.cs.theo.re
 
-package theo.re
-
-import theo._
+import edu.tum.cs.theo._
+import Util._
 
 object Main extends Module {
-
-	import Util._
 
 	@Operation(name = "re-equal")
 	def reEqual(args: Seq[String]) {

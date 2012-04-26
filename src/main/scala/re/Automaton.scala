@@ -1,5 +1,4 @@
-
-package theo.re
+package edu.tum.cs.theo.re
 
 import scala.collection._
 
@@ -20,7 +19,7 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 	
 	def isAccepting(metaState: M[S]): Boolean
 
-	final def step(metaState: M[S], sym: T): M[S] =	// w00t scalaz
+	final def step(metaState: M[S], sym: T): M[S] =
 		metaState flatMap { s => 
 			transition get ((s, sym)) getOrElse (implicitly[Empty[M]].empty[S])
 		}

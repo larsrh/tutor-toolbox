@@ -1,5 +1,4 @@
-
-package theo
+package edu.tum.cs.theo
 
 object Main {
 
@@ -21,4 +20,3 @@ object Main {
 	}
 
 }
-

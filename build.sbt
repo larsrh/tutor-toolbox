@@ -14,6 +14,6 @@ scalacOptions ++= Seq(
 libraryDependencies +=
 	"org.scalaz" %% "scalaz-core" % "6.0.4"
 
-mainClass := Some("theo.Main")
+mainClass := Some("edu.tum.cs.theo.Main")
 
 assemblySettings

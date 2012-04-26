@@ -1,5 +1,4 @@
-
-package theo
+package edu.tum.cs.theo
 
 object Util {
 
@@ -58,4 +57,3 @@ object Util {
 	}
 
 }
-

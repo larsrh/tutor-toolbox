@@ -1,5 +1,4 @@
-
-package theo;
+package edu.tum.cs.theo;
 
 import java.lang.annotation.*;
 

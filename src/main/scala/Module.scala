@@ -1,5 +1,4 @@
-
-package theo
+package edu.tum.cs.theo
 
 object Module {
 
@@ -23,4 +22,3 @@ abstract class Module { self: Singleton =>
 	}
 
 }
-

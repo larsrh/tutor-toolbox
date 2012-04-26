@@ -1,7 +1,4 @@
-
-package theo
-
-import theo._
+package edu.tum.cs.theo
 
 package object cfg {
 
@@ -15,4 +12,3 @@ package object cfg {
 	def probeEquality(length: Int, s1: String, s2: String): Option[(List[Char], Boolean)] = probeEquality(length, Parser.parseToChomskyNF(s1), Parser.parseToChomskyNF(s2))
 
 }
-

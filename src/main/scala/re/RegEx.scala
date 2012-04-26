@@ -1,5 +1,4 @@
-
-package theo.re
+package edu.tum.cs.theo.re
 
 import scala.collection._
 

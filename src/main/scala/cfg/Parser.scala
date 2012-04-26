@@ -1,5 +1,4 @@
-
-package theo.cfg
+package edu.tum.cs.theo.cfg
 
 import scala.util.parsing.combinator.RegexParsers
 import scala.util.matching.Regex

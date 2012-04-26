@@ -1,5 +1,4 @@
-
-package theo
+package edu.tum.cs.theo
 
 import scalaz._
 import Scalaz._
@@ -42,4 +41,3 @@ package object re {
 	def checkEquality(s1: String, s2: String): Option[(List[Char], Boolean)] = checkEquality(Parser.parseToDFA(s1), Parser.parseToDFA(s2))
 
 }
-
