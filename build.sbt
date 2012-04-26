@@ -17,3 +17,5 @@ libraryDependencies +=
 mainClass := Some("edu.tum.cs.theo.Main")
 
 assemblySettings
+
+jarName in assembly := "tutor-toolbox.jar"
