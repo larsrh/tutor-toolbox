@@ -1,18 +1,19 @@
-name := "Tutor-Toolbox"
+import AssemblyKeys._
 
-version := "0.1"
+name := "tutor-toolbox"
 
-scalaVersion := "2.9.0-1"
+version := "0.2-SNAPSHOT"
 
-scalacOptions +=
-	"-deprecation"
+scalaVersion := "2.9.2"
+
+scalacOptions ++= Seq(
+	"-deprecation",
+	"-unchecked"
+)
 
 libraryDependencies +=
-	"org.scalaz" %% "scalaz-core" % "6.0.1"
+	"org.scalaz" %% "scalaz-core" % "6.0.4"
 
-seq(ProguardPlugin.proguardSettings: _*)
+mainClass := Some("theo.Main")
 
-proguardOptions ++= List(
-	keepMain("theo.Main"),
-	"-keep class theo.**"
-)
+assemblySettings
