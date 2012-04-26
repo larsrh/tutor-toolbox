@@ -1,5 +1,11 @@
 package edu.tum.cs.theo
 
+import util.parsing.combinator.RegexParsers
+import util.matching.Regex
+
+import scalaz._
+import Scalaz._
+
 object Util {
 
 	def sequenceIter[T](elems: Set[T], maxLen: Int = 15): Iterator[IndexedSeq[T]] = new Iterator[IndexedSeq[T]] {
@@ -38,22 +44,27 @@ object Util {
 		}
 	}
 
-	def compare[T, U](examples: Iterable[U])(f: (U, T) => Boolean)(args: T*): Option[(U, Seq[Boolean])] = {
+	def compare[T, U, I](examples: Iterable[U])(f: (U, T) => (I, Boolean))(args: T*): Option[(U, Seq[(I, Boolean)])] = {
 		require(args.size >= 2)
 
 		val pargs = args.par
 		examples.view flatMap { u =>
 			val results = pargs map { t => f(u, t) } seq;
-			if (results.toSet.size > 1)
+			if (results.map(_._2).toSet.size > 1)
 				Some((u, results))
 			else
 				None
 		} headOption 
 	}
 
-	implicit def enrichBoolean(b: Boolean) = new {
-		def choose[T](ifTrue: => T, ifFalse: => T) =
-			if (b) ifTrue else ifFalse
+	trait CommonParsers extends RegexParsers {
+
+		final def parseAll[T](parser: this.type => Parser[T], input: String): Validation[String, T] = parseAll(parser(this), input) match {
+			case NoSuccess(msg, _) => msg.fail
+			case Success(result, _) => result.success
+		}
+
 	}
+
 
 }

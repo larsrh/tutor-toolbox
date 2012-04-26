@@ -2,6 +2,11 @@ package edu.tum.cs.theo.cfg
 
 import collection.mutable
 
+import scalaz._
+import Scalaz._
+
+import edu.tum.cs.theo.Util._
+
 trait CFG[NT, +T] {
 	val start: NT
 }
@@ -150,20 +155,10 @@ case class GenericCFG[NT, T](
 		}
 
 		val nonEmpty = eliminateEmpty(productions)
-//		println(nonEmpty mkString "\n")
-//		println("***")
 		val nonChain = eliminateChain(nonEmpty)
-//		println(nonChain mkString "\n")
-//		println("***")
 		val converted = convertToNew(nonChain)
-//		println(converted mkString "\n")
-//		println("***")
 		val added = addTerminalNTs(converted)
-//		println(added mkString "\n")
-//		println("***")
 		val (splitted, containsEmpty) = split(added)
-//		println("containsEmpty = " + containsEmpty)
-//		println(splitted mkString "\n")
 
 		ChomskyNF(Left(start), splitted, containsEmpty)
 	}
@@ -192,11 +187,11 @@ case class ChomskyNF[NT, T](
 	containsEmpty: Boolean
 ) extends CFG[NT, T] {
 
-	def contains(word: T*) = {
+	def cyk(word: T*): Map[(Int, Int), Set[NT]] = {
 		if (word.length == 0) {
-			containsEmpty
+			containsEmpty ? Map((0, 0) -> Set(start)) | Map.empty
 		}
-		else { // CYK
+		else {
 			def producingT(t: T) =
 				for ((nt, Left(`t`)) <- productions) yield nt
 			def producingNT(nts: (NT, NT)) =
@@ -210,13 +205,13 @@ case class ChomskyNF[NT, T](
 			for (i <- 0 until len)
 				v += (i, i) -> producingT(w(i))
 
-			for (diff <- 1 to len;
-			     i <- 0 to len - diff - 1; j = i + diff) 
+			for {
+				diff <- 1 to len
+				i <- 0 to len - diff - 1; j = i + diff
+			}
 				v += (i, j) -> ((i until j) flatMap { k => allProducingNT(v(i, k), v(k + 1, j)) } toSet)
 			
-//			println(v mkString "\n")
-
-			v(0, len - 1) contains start
+			v
 		}
 	}
 

@@ -38,6 +38,7 @@ package object re {
 	}
 		
 	
-	def checkEquality(s1: String, s2: String): Option[(List[Char], Boolean)] = checkEquality(Parser.parseToDFA(s1), Parser.parseToDFA(s2))
+	def parseAndCheckEquality(s1: String, s2: String): ValidationNEL[String, Option[(List[Char], Boolean)]] = 
+		(Parser.parseToDFA(s1).liftFailNel |@| Parser.parseToDFA(s2).liftFailNel)(checkEquality)
 
 }

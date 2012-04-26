@@ -1,5 +1,8 @@
 package edu.tum.cs.theo.re
 
+import scalaz._
+import Scalaz._
+
 import edu.tum.cs.theo._
 import Util._
 
@@ -13,10 +16,13 @@ object Main extends Module {
 		}
 		else {
 			println("Checking whether " + args(0) + " is equivalent to " + args(1))
-			println(checkEquality(args(0), args(1)) map { case (proof, which) =>
-				"Not equivalent. Proof: '" + proof.mkString + "' (accepted by " + which.choose("first","second") + ")"
-			} getOrElse {
-				"Equivalent."
+			println(parseAndCheckEquality(args(0), args(1)) match {
+				case Success(Some((proof, which))) =>
+					"Not equivalent. Proof: '" + proof.mkString + "' (accepted by " + (which ? "first" | "second") + ")"
+				case Success(None) =>
+					"Equivalent."
+				case Failure(nel) =>
+					"Parse error:\n" + nel.list.mkString("\n")
 			})
 		}
 	}
