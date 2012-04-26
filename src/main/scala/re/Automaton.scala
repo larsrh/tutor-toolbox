@@ -1,6 +1,6 @@
 package edu.tum.cs.theo.re
 
-import scala.collection._
+import scala.collection.mutable
 
 import scalaz._
 import Scalaz._
@@ -8,6 +8,8 @@ import Scalaz._
 abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 
 	type Mapped[U, V] <: AutomatonLike[U, V, M]
+
+	final def emptyS = implicitly[Empty[M]].empty[S]
 
 	def start: M[S]
 	def transition: Map[(S, T), M[S]]
@@ -19,10 +21,9 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 	
 	def isAccepting(metaState: M[S]): Boolean
 
-	final def step(metaState: M[S], sym: T): M[S] =
-		metaState flatMap { s => 
-			transition get ((s, sym)) getOrElse (implicitly[Empty[M]].empty[S])
-		}
+	final def singleStep(state: S, sym: T): M[S] = transition get ((state, sym)) getOrElse emptyS
+
+	final def step(metaState: M[S], sym: T): M[S] = metaState >>= (singleStep(_, sym))
 
 	final def eval(word: T*): Boolean = isAccepting((start /: word)(step))
 
@@ -40,7 +41,7 @@ abstract class AutomatonLike[S, T, M[_] : Monad : Plus : Empty] {
 
 	final def nonEmpty: Option[(List[T], M[S])] = {
 		var queue = mutable.Queue((start, List.empty[T]))
-		var done = Set[M[S]]()
+		var done = Set.empty[M[S]]
 
 		while (!queue.isEmpty) {
 			val (metaState, proof) = queue.dequeue()
@@ -73,8 +74,8 @@ class Automaton[S, T](override val start: Set[S], override val transition: Map[(
 
 	def deterministic: DeterministicAutomaton[Set[S], T] = {
 		var queue = mutable.Queue(start)
-		var done = Set[Set[S]]()
-		var newTransition = Map[(Set[S], T), Option[Set[S]]]()
+		var done = Set.empty[Set[S]]
+		var newTransition = Map.empty[(Set[S], T), Option[Set[S]]]
 
 		while (!queue.isEmpty) {
 			val metaState = queue.dequeue()
@@ -95,7 +96,7 @@ class Automaton[S, T](override val start: Set[S], override val transition: Map[(
 
 object DeterministicAutomaton {
 
-	def empty[S, T] = new DeterministicAutomaton[S, T](Option.empty[S], Map[(S, T), Option[S]](), Set[S]())
+	def empty[S, T] = new DeterministicAutomaton[S, T](none, Map.empty[(S, T), Option[S]], Set.empty[S])
 
 	sealed trait CombineMode 
 	case object Intersection extends CombineMode 
@@ -112,10 +113,8 @@ class DeterministicAutomaton[S, T] private(override val start: Option[S], overri
 
 	override type Mapped[U, V] = DeterministicAutomaton[U, V]
 
-	override protected[this] def withParams[U, V](newStart: Option[U], newTransition: Map[(U, V), Option[U]], newEnd: Set[U]) = newStart map { s =>
-		new DeterministicAutomaton(s, newTransition, newEnd)
-	} getOrElse
-		empty[U, V]
+	override protected[this] def withParams[U, V](newStart: Option[U], newTransition: Map[(U, V), Option[U]], newEnd: Set[U]) =
+		newStart map (new DeterministicAutomaton(_, newTransition, newEnd)) getOrElse empty[U, V]
 	
 	override def isAccepting(state: Option[S]) = state exists { s => end contains s }
 
@@ -139,23 +138,25 @@ class DeterministicAutomaton[S, T] private(override val start: Option[S], overri
 					for (sym <- syms) {
 						val to = (this.step(from1, sym), other.step(from2, sym))
 						queue.enqueue(to)
-						newTransition += ((from1, from2), sym) -> Some(to)
+						newTransition += ((from1, from2), sym) -> to.some
 					}
 					done += state
 				}
 			}
 
+			def toSome(tuple: (S, U)) = ((s: S) => s.some) <-: tuple :-> ((u: U) => u.some)
+
 			val newEnd: Set[UU] = mode match {
 				case Union =>
-					val e1: Set[UU] = for (e <- this.end; s <- other.states) yield (Some(e),Some(s))
-					val e2: Set[UU] = for (s <- this.states; e <- other.end) yield (Some(s),Some(e))
-					e1 union e2 union (this.end map { e => (Some(e), None) }) union (other.end map { e => (None, Some(e)) })
+					((this.end <|*|> other.states) ++ (this.states <|*|> other.end) map toSome) ++
+					(this.end map { e => (e.some, none) }) ++
+					(other.end map { e => (none, e.some) })
 				case Intersection =>
-					for (e1 <- this.end; e2 <- other.end) yield (Some(e1), Some(e2))
+					(this.end <|*|> other.end) map toSome
 				case EqualCheck =>
-					val e1: Set[UU] = for (e <- this.end; s <- other.states -- other.end) yield (Some(e),Some(s))
-					val e2: Set[UU] = for (s <- this.states -- this.end;  e <- other.end) yield (Some(s),Some(e))
-					e1 union e2 union (this.end map { e => (Some(e), None) }) union (other.end map { e => (None, Some(e)) })
+					((this.end <|*|> (other.states -- other.end)) ++ ((this.states -- this.end) <|*|> other.end) map toSome) ++
+					(this.end map { e => (e.some, none) }) ++
+					(other.end map { e => (none, e.some) })
 			}
 
 			new DeterministicAutomaton[UU, T]((this.start, other.start), newTransition, newEnd)

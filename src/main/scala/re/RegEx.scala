@@ -1,7 +1,5 @@
 package edu.tum.cs.theo.re
 
-import scala.collection._
-
 object RegEx {
 
 	type MRE[T] = RegEx[MarkedSymbol[T]]
@@ -44,8 +42,8 @@ sealed abstract class RegEx[T] {
 		// further by the caller.
 		lazy val markedRegex = mark
 		lazy val states = Map(markedRegex.symbols map { sym => sym -> SymbolState(sym) } toList :_*)
-		var transitions = Map[(SMS, MarkedSymbol[T]), Set[SMS]]()
-		var endStates = Set[SMS]()
+		var transitions = Map.empty[(SMS, MarkedSymbol[T]), Set[SMS]]
+		var endStates = Set.empty[SMS]
 
 		for (first <- markedRegex.first)
 			transitions += makeTransition(StartState, first)
