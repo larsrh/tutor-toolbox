@@ -30,14 +30,12 @@ package object re {
 		}
 	}
 
-	def checkEquality[S, T, U](da1: DeterministicAutomaton[S, T], da2: DeterministicAutomaton[U, T]): Option[(List[T], Boolean)] = {
+	def checkEquality[S, T, U](da1: DeterministicAutomaton[S, T], da2: DeterministicAutomaton[U, T]): Option[(List[T], Boolean)] =
 		(da1.combine(da2, DeterministicAutomaton.EqualCheck).nonEmpty: @unchecked) match {
 			case None => None
 			case Some((proof, Some(state))) => Some((proof, da1 isAccepting state._1))
 		}
-	}
-		
-	
+
 	def parseAndCheckEquality(s1: String, s2: String): ValidationNEL[String, Option[(List[Char], Boolean)]] = 
 		(Parser.parseToDFA(s1).liftFailNel |@| Parser.parseToDFA(s2).liftFailNel)(checkEquality)
 
