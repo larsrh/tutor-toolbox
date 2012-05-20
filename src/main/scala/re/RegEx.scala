@@ -125,3 +125,11 @@ final case class Opt[T](expr: RegEx[T]) extends RegEx[T] {
 	override def follow(syms: Set[T]) = expr follow syms
 	override def symbols = expr.symbols
 }
+
+final case class Epsilon[T]() extends RegEx[T] {
+	override def map[U](f: T => U) = Epsilon[U]()
+	override def containsEmptyWord = true
+	override def first = Set()
+	override def follow(syms: Set[T]) = Set()
+	override def symbols = Set()
+}
