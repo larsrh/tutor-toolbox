@@ -32,16 +32,16 @@ case class GenericCFG[NT, T](
 		
 			while (dirty) {
 				var addEmpty, addNonEmpty: Productions = Set()
-				for ((lhsE, _) <- empty; (lhsNE, rhs) <- nonEmpty) {
-					rhs indexOf Left(lhsE) match {
-						case -1 =>
-						case n =>
-							rhs.patch(n, Nil, 1) match {
-								case Nil => addEmpty += ((lhsNE, Nil))
-								case list => addNonEmpty += ((lhsNE, list))
-							}
-					}
+				for {
+					(lhsE, _) <- empty
+					(lhsNE, rhs) <- nonEmpty
+					(sym, n) <- rhs.zipWithIndex
+					if sym == Left(lhsE)
 				}
+					rhs.patch(n, Nil, 1) match {
+						case Nil => addEmpty += ((lhsNE, Nil))
+						case list => addNonEmpty += ((lhsNE, list))
+					}
 
 				val (eSize, neSize) = (empty.size, nonEmpty.size)
 				empty ++= addEmpty
