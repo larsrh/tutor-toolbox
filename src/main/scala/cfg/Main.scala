@@ -12,7 +12,7 @@ object Main extends Module {
 	def reEqual(args: Seq[String]) {
 		if (args.length != 3) {
 			println("supply a maximum word length and exactly two CFGs")
-			println("example: 10 <S>:<S>->ab <S>:<S>->a|b")
+			println("example: 10 S:S->ab S:S->a|b")
 		}
 		else {
 			println("Probing whether " + args(1) + " is equivalent to " + args(2))

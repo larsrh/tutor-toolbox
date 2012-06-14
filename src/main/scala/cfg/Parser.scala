@@ -15,7 +15,7 @@ object Parser {
 		def rhs: Parser[List[List[Either[Symbol, Char]]]] = repsep(simpleRHS, "|")
 		def simpleRHS: Parser[List[Either[Symbol, Char]]] = (terminal | (nonTerminal ^^ { Left(_) }))*
 		def terminal: Parser[Either[Symbol, Char]] = new Regex("[a-z0-9]") ^^ { str => Right(str.charAt(0)) }
-		def nonTerminal: Parser[Symbol] = new Regex("<[a-zA-Z0-9_]*>") ^^ { str => Symbol(str.tail.init) }
+		def nonTerminal: Parser[Symbol] = new Regex("[A-Z_]") ^^ { str => Symbol(str) }
 	}
 
 	def parse(s: String): Validation[String, GenericCFG[Symbol, Char]] = CFGParser.parseAll(_.cfg, s)
